@@ -1,8 +1,8 @@
 package iteration
 
-func Iteration(c string) string {
+func Repeat(c string, num int) string {
 	var repeated string
-	for i := 0; i < 5; i++ {
+	for i := 0; i < num; i++ {
 		repeated = repeated + c
 	}
 	return repeated
