@@ -1,6 +1,7 @@
 package arrays
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -19,9 +20,10 @@ func TestSumAll(t *testing.T) {
 	t.Run("calculate collective array", func(t *testing.T) {
 		numbers1 := []int{1, 2, 3, 4}
 		numbers2 := []int{1, 2, 3, 4, 5, 6}
-		result := SumAll(numbers1, numbers2)
-		expected := [2]int{10, 21}
-		if result != expected {
+		numbers3 := []int{9, 100}
+		result := SumAll(numbers1, numbers2, numbers3)
+		expected := []int{10, 21, 109}
+		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("expected %+v, got %+v", expected, result)
 		}
 	})
