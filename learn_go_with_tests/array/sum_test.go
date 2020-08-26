@@ -16,13 +16,13 @@ func TestSum(t *testing.T) {
 	})
 }
 
-func TestSumAll(t *testing.T) {
+func TestSumAllTails(t *testing.T) {
 	t.Run("calculate collective array", func(t *testing.T) {
 		numbers1 := []int{1, 2, 3, 4}
 		numbers2 := []int{1, 2, 3, 4, 5, 6}
 		numbers3 := []int{9, 100}
-		result := SumAll(numbers1, numbers2, numbers3)
-		expected := []int{10, 21, 109}
+		result := SumAllTails(numbers1, numbers2, numbers3)
+		expected := []int{4, 6, 100}
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("expected %+v, got %+v", expected, result)
 		}

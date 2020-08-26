@@ -8,10 +8,10 @@ func Sum(numbers []int) int {
 	return sum
 }
 
-func SumAll(numberSums ...[]int) []int {
+func SumAllTails(numberSums ...[]int) []int {
 	var sums []int
 	for _, numberSum := range numberSums {
-		sums = append(sums, Sum(numberSum))
+		sums = append(sums, numberSum[len(numberSum)-1])
 	}
 	return sums
 }
