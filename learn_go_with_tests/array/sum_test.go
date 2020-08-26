@@ -16,6 +16,13 @@ func TestSum(t *testing.T) {
 	})
 }
 
+func checkSum(t *testing.T, result []int, expected []int) {
+	t.Helper()
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("expected %+v, got %+v", expected, result)
+	}
+}
+
 func TestSumAllTails(t *testing.T) {
 	t.Run("calculate collective array", func(t *testing.T) {
 		numbers1 := []int{1, 2, 3, 4}
@@ -23,8 +30,14 @@ func TestSumAllTails(t *testing.T) {
 		numbers3 := []int{9, 100}
 		result := SumAllTails(numbers1, numbers2, numbers3)
 		expected := []int{9, 20, 100}
-		if !reflect.DeepEqual(result, expected) {
-			t.Errorf("expected %+v, got %+v", expected, result)
-		}
+		checkSum(t, result, expected)
+	})
+
+	t.Run("safely sum empty slices", func(t *testing.T) {
+		numbers := []int{}
+		numbers2 := []int{9, 11}
+		result := SumAllTails(numbers, numbers2)
+		expected := []int{0, 11}
+		checkSum(t, result, expected)
 	})
 }
