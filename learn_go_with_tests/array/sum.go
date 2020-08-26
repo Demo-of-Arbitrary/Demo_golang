@@ -9,10 +9,9 @@ func Sum(numbers []int) int {
 }
 
 func SumAll(numberSums ...[]int) []int {
-	lengthOfNumbers := len(numberSums)
-	sums := make([]int, lengthOfNumbers)
-	for i, numberSum := range numberSums {
-		sums[i] = Sum(numberSum)
+	var sums []int
+	for _, numberSum := range numberSums {
+		sums = append(sums, Sum(numberSum))
 	}
 	return sums
 }
