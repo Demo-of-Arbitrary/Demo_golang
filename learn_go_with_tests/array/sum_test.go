@@ -22,7 +22,7 @@ func TestSumAllTails(t *testing.T) {
 		numbers2 := []int{1, 2, 3, 4, 5, 6}
 		numbers3 := []int{9, 100}
 		result := SumAllTails(numbers1, numbers2, numbers3)
-		expected := []int{4, 6, 100}
+		expected := []int{9, 20, 100}
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("expected %+v, got %+v", expected, result)
 		}
