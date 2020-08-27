@@ -19,16 +19,16 @@ func TestArea(t *testing.T) {
 			t.Errorf("expected %f, got %f", expected, actual)
 		}
 	}
-	t.Run("rectangles", func(t *testing.T) {
-		rectAngle := Rectangle{8.0, 2.0}
-		expected := 16.0
-		checkArea(t, rectAngle, expected)
-	})
 
-	t.Run("circles", func(t *testing.T) {
-		circle := Circle{10}
-		expected := 314.1592653589793
+	tests := []struct {
+		shape    Shape
+		expected float64
+	}{
+		{Rectangle{8.0, 2.0}, 16.0},
+		{Circle{10.0}, 314.1592653589793},
+	}
 
-		checkArea(t, circle, expected)
-	})
+	for _, tt := range tests {
+		checkArea(t, tt.shape, tt.expected)
+	}
 }
