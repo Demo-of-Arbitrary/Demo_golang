@@ -20,3 +20,7 @@ func (w *Wallet) Deposit(amount BitCoin) {
 	w.balance += amount
 	fmt.Printf("address of package is %v \n", &w.balance)
 }
+
+func (w *Wallet) Withdraw(amount BitCoin) {
+	w.balance -= amount
+}
