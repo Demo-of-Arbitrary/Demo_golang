@@ -7,14 +7,14 @@ import (
 
 func TestWallet(t *testing.T) {
 	wallet := Wallet{}
-	wallet.Deposit(10)
+	wallet.Deposit(BitCoin(10))
 	got := wallet.Balance()
 
 	fmt.Printf("address of test is %v \n", &wallet.balance)
 
-	want := 10
+	want := BitCoin(10)
 
 	if got != want {
-		t.Errorf("got %d, want %d", got, want)
+		t.Errorf("got %s, want %s", got, want)
 	}
 }
