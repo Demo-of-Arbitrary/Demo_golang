@@ -1,6 +1,9 @@
 package pointer
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type BitCoin int
 
@@ -21,6 +24,12 @@ func (w *Wallet) Deposit(amount BitCoin) {
 	fmt.Printf("address of package is %v \n", &w.balance)
 }
 
-func (w *Wallet) Withdraw(amount BitCoin) {
+var ErrInsufficientFunds = errors.New("cannot withdraw, insufficient funds")
+
+func (w *Wallet) Withdraw(amount BitCoin) error {
+	if amount > w.balance {
+		return ErrInsufficientFunds
+	}
 	w.balance -= amount
+	return nil
 }
