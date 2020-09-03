@@ -2,14 +2,19 @@ package main
 
 import "testing"
 
-func TestDictionary(t *testing.T) {
-	t.Run("Dictionary", func(t *testing.T) {
-		dictionary := map[string]string{"test": "this is just a test"}
-		got := Search(dictionary, "test")
-		want := "this is just a test"
+func assertString(t *testing.T, want string, got string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("want %q, got %q", want, got)
+	}
+}
 
-		if got != want {
-			t.Errorf("want %q, got %q, given %q", want, got, "test")
-		}
+func TestSearch(t *testing.T) {
+	t.Run("Dictionary", func(t *testing.T) {
+		dictionary := Dictionary{"test": "this is just a test"}
+
+		got := dictionary.Search("test")
+		want := "this is just a test"
+		assertString(t, want, got)
 	})
 }
