@@ -32,7 +32,7 @@ func TestSearch(t *testing.T) {
 
 	t.Run("unknown Word", func(t *testing.T) {
 		_, err := dictionary.Search("good")
-		want := ErrorNotFound
+		want := ErrNotFound
 		if err == nil {
 			t.Fatal("expected to get an error")
 		}
@@ -64,6 +64,21 @@ func TestUpdate(t *testing.T) {
 		dictionary := Dictionary{"apple": "this is a fruit"}
 		dictionary.Update("apple", "this is a round fruit")
 		assertDefinitions(t, dictionary, "apple", "this is a round fruit")
+	})
+	t.Run("update word with newly key", func(t *testing.T) {
+		dictionary := Dictionary{"apple": "this is a fruit"}
+		err := dictionary.Update("orange", "this is a round fruit")
+		assertError(t, err, ErrWordNotExists)
+		assertDefinitions(t, dictionary, "apple", "this is a fruit")
+	})
+}
+
+func TestDeleteWord(t *testing.T) {
+	t.Run("delete word", func(t *testing.T) {
+		dictionary := Dictionary{"apple": "this is a fruit"}
+		dictionary.Delete("apple")
+		_, err := dictionary.Search("apple")
+		assertError(t, err, ErrNotFound)
 	})
 }
 
