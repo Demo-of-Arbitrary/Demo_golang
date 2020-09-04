@@ -59,6 +59,14 @@ func TestAdd(t *testing.T) {
 	})
 }
 
+func TestUpdate(t *testing.T) {
+	t.Run("update word", func(t *testing.T) {
+		dictionary := Dictionary{"apple": "this is a fruit"}
+		dictionary.Update("apple", "this is a round fruit")
+		assertDefinitions(t, dictionary, "apple", "this is a round fruit")
+	})
+}
+
 func assertDefinitions(t *testing.T, dictionary Dictionary, word, definition string) {
 	t.Helper()
 
@@ -68,6 +76,5 @@ func assertDefinitions(t *testing.T, dictionary Dictionary, word, definition str
 		t.Fatal("should find added word", err)
 	}
 
-	want := "this is a fruit"
-	assertString(t, want, got)
+	assertString(t, definition, got)
 }
