@@ -11,19 +11,27 @@ type Sleeper interface {
 	Sleep()
 }
 
-type SpySleeper struct {
-	Calls int
-}
-
-func (s *SpySleeper) Sleep() {
-	s.Calls++
-}
-
 type DefaultSleeper struct{}
 
 func (d *DefaultSleeper) Sleep() {
 	time.Sleep(1 * time.Second)
 }
+
+type CountdownOperationSpy struct {
+	Calls []string
+}
+
+func (c *CountdownOperationSpy) Sleep() {
+	c.Calls = append(c.Calls, sleep)
+}
+
+func (c *CountdownOperationSpy) Write(p []byte) (n int, err error) {
+	c.Calls = append(c.Calls, writer)
+	return
+}
+
+const writer = "writer"
+const sleep = "sleep"
 
 const countDownNum = 3
 const finalValue = "Go!"
