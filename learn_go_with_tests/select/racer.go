@@ -6,7 +6,13 @@ import (
 	"time"
 )
 
-func Racer(a, b string, timeout time.Duration) (winner string, err error) {
+const timeout = 10 * time.Second
+
+func Racer(a, b string) (winner string, err error) {
+	return ConfigurableRacer(a, b, timeout)
+}
+
+func ConfigurableRacer(a, b string, timeout time.Duration) (winner string, err error) {
 	select {
 	case <-ping(a):
 		return a, nil
