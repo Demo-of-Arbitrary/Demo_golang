@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+type Person struct {
+	Name    string
+	Profile Profile
+}
+
+type Profile struct {
+	Age  int
+	City string
+}
+
 func TestWalk(t *testing.T) {
 	cases := []struct {
 		Name          string
@@ -13,14 +23,12 @@ func TestWalk(t *testing.T) {
 	}{
 		{
 			"Strcut with one sting field",
-			struct {
-				Name string
-				City string
-				Age  int
-			}{
+			Person{
 				"Chris",
-				"London",
-				33,
+				Profile{
+					33,
+					"London",
+				},
 			},
 			[]string{"Chris", "London"},
 		},
