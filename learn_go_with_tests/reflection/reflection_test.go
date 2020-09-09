@@ -76,4 +76,32 @@ func TestWalk(t *testing.T) {
 			}
 		})
 	}
+	t.Run("with maps", func(t *testing.T) {
+		aMap := map[string]string{
+			"Foo": "Bar",
+			"Baz": "Boz",
+		}
+
+		var got []string
+		walk(aMap, func(key string) {
+			got = append(got, key)
+		})
+
+		assertContains(t, got, "Bar")
+		assertContains(t, got, "Boz")
+	})
+}
+
+func assertContains(t *testing.T, haystack []string, needle string) {
+	t.Helper()
+	contains := false
+	for _, v := range haystack {
+		if v == needle {
+			contains = true
+		}
+	}
+
+	if !contains {
+		t.Errorf("expected %+v to contain %+v, but it didn't'", needle, haystack)
+	}
 }
