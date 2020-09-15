@@ -3,13 +3,13 @@ package numeral
 import "strings"
 
 type RomanNumeral struct {
-	Value  int
+	Value  uint16
 	Symbol string
 }
 
 type RomanNumerals []RomanNumeral
 
-func (n RomanNumerals) ValueOf(symbols ...byte) int {
+func (n RomanNumerals) ValueOf(symbols ...byte) uint16 {
 	symbol := string(symbols)
 	for _, v := range n {
 		if v.Symbol == symbol {
@@ -45,7 +45,7 @@ var allRomanNumeral = RomanNumerals{
 	{1, "I"},
 }
 
-func ConvertToRoman(arabic int) string {
+func ConvertToRoman(arabic uint16) string {
 	var result strings.Builder
 	for _, r := range allRomanNumeral {
 		for arabic >= r.Value {
@@ -56,11 +56,11 @@ func ConvertToRoman(arabic int) string {
 	return result.String()
 }
 
-func ConvertToArabic(roman string) int {
-	total := 0
-	for i := 0; i < len(roman); i++ {
+func ConvertToArabic(roman string) uint16 {
+	total := uint16(0)
+	for i := uint16(0); i < uint16(len(roman)); i++ {
 		symbol := roman[i]
-		if couldBeSubstractive(i, symbol, roman) {
+		if couldBeSubstractive(uint16(i), symbol, roman) {
 			nextSymbol := roman[i+1]
 
 			if value := allRomanNumeral.ValueOf(symbol, nextSymbol); value > 0 {
@@ -93,8 +93,8 @@ func (w windowedRoman) Symbols() (symbols [][]byte) {
 	return
 }
 
-func couldBeSubstractive(index int, currentSymbol uint8, roman string) bool {
-	return index+1 < len(roman) && isSubstractive(currentSymbol)
+func couldBeSubstractive(index uint16, currentSymbol uint8, roman string) bool {
+	return index+1 < uint16(len(roman)) && isSubstractive(currentSymbol)
 }
 
 func isSubstractive(symbol uint8) bool {
