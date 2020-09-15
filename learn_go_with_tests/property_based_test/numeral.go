@@ -9,9 +9,10 @@ type RomanNumeral struct {
 
 type RomanNumerals []RomanNumeral
 
-func (n RomanNumerals) ValueOf(numeral string) int {
+func (n RomanNumerals) ValueOf(symbols ...byte) int {
+	symbol := string(symbols)
 	for _, v := range n {
-		if v.Symbol == numeral {
+		if v.Symbol == symbol {
 			return v.Value
 		}
 	}
@@ -51,16 +52,15 @@ func ConvertToArabic(roman string) int {
 		symbol := roman[i]
 		if couldBeSubstractive(i, symbol, roman) {
 			nextSymbol := roman[i+1]
-			potentialSymbols := string([]byte{symbol, nextSymbol})
 
-			if value := allRomanNumeral.ValueOf(potentialSymbols); value > 0 {
+			if value := allRomanNumeral.ValueOf(symbol, nextSymbol); value > 0 {
 				total += value
 				i++
 			} else {
 				total++
 			}
 		} else {
-			total += allRomanNumeral.ValueOf(string([]byte{symbol}))
+			total += allRomanNumeral.ValueOf(symbol)
 		}
 	}
 	return total
