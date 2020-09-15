@@ -3,20 +3,22 @@ package numeral
 import "testing"
 
 func TestRomanNumeral(t *testing.T) {
-	t.Run("1 gets converted to I", func(t *testing.T) {
-		got := ConvertToRoman(1)
-		want := "I"
+	cases := []struct {
+		Description string
+		Arabic      int
+		Want        string
+	}{
+		{"1 gets converted to I", 1, "I"},
+		{"2 gets converted to II", 2, "II"},
+		{"3 gets converted to III", 3, "III"},
+	}
 
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
-	})
-	t.Run("2 gets converted to II", func(t *testing.T) {
-		got := ConvertToRoman(2)
-		want := "II"
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
-	})
+	for _, v := range cases {
+		t.Run(v.Description, func(t *testing.T) {
+			got := ConvertToRoman(v.Arabic)
+			if got != v.Want {
+				t.Errorf("expected %q, got %q", v.Want, got)
+			}
+		})
+	}
 }
