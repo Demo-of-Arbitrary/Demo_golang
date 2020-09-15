@@ -47,7 +47,7 @@ func TestRomanNumeral(t *testing.T) {
 }
 
 func TestConvertingToArabic(t *testing.T) {
-	for _, v := range cases[:5] {
+	for _, v := range cases {
 		t.Run(fmt.Sprintf("%q gets converted to %d", v.Roman, v.Arabic), func(t *testing.T) {
 			got := ConvertToArabic(v.Roman)
 
