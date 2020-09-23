@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 type PlayerStore interface {
@@ -16,13 +15,22 @@ type PlayerServer struct {
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := strings.TrimPrefix(r.URL.Path, "/players/")
-	switch r.Method {
-	case http.MethodGet:
-		p.showScore(w, player)
-	case http.MethodPost:
-		p.processWins(w, player)
-	}
+	router := http.NewServeMux()
+
+	router.Handle("/league", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	router.Handle("/players/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		player := r.URL.Path[len("/players/"):]
+
+		switch r.Method {
+		case http.MethodGet:
+			p.showScore(w, player)
+		case http.MethodPost:
+			p.processWins(w, player)
+		}
+	}))
+	router.ServeHTTP(w, r)
 }
 
 func (p *PlayerServer) processWins(w http.ResponseWriter, player string) {
