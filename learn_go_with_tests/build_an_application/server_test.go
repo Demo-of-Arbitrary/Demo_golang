@@ -111,12 +111,23 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
 
-	response := httptest.NewRecorder()
-	server.ServeHTTP(response, newGetScoreRequest(player))
+	t.Run("get score", func(t *testing.T) {
+		response := httptest.NewRecorder()
+		server.ServeHTTP(response, newGetScoreRequest(player))
+		assertStatus(t, response.Code, http.StatusOK)
 
-	assertStatus(t, response.Code, http.StatusOK)
+		assertResponseBody(t, response.Body.String(), "3")
+	})
+	t.Run("get league", func(t *testing.T) {
+		response := httptest.NewRecorder()
+		server.ServeHTTP(response, newLeagueRequest())
+		assertStatus(t, response.Code, http.StatusOK)
 
-	assertResponseBody(t, response.Body.String(), "3")
+		got := getLeagueFromResponse(t, response.Body)
+		want := []Player{{"Pepper", 3}}
+		assertLeague(t, got, want)
+	})
+
 }
 
 func TestLeague(t *testing.T) {
@@ -131,7 +142,7 @@ func TestLeague(t *testing.T) {
 		store := StubPlayerStore{nil, nil, wantedLeague}
 		server := NewPlayerServer(&store)
 
-		request, _ := http.NewRequest(http.MethodGet, "/league", nil)
+		request := newLeagueRequest()
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
@@ -142,6 +153,11 @@ func TestLeague(t *testing.T) {
 
 		assertContentType(t, response.Result().Header, "application/json")
 	})
+}
+
+func newLeagueRequest() *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
+	return req
 }
 
 func assertContentType(t *testing.T, header http.Header, expected string) {
