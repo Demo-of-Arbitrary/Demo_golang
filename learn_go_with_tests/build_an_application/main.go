@@ -15,7 +15,12 @@ func main() {
 		log.Fatalf("problem opening database: %s %v", dbFileName, err)
 	}
 
-	store := NewFileSystemPlayerStore(database)
+	store, err := NewFileSystemPlayerStore(database)
+
+	if err != nil {
+		log.Fatalf("problem creating file system player store: %v", err)
+	}
+
 	server := NewPlayerServer(store)
 
 	if err := http.ListenAndServe(":5000", server); err != nil {
