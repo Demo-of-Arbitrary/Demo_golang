@@ -6,24 +6,11 @@ import (
 	"os"
 )
 
-type FileSystemPlayerStore struct {
-	database *json.Encoder
-	league   League
-}
-
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
-	file.Seek(0, 0)
-	info, err := file.Stat()
-
+	err := initialPlayerDBFile(file)
 	if err != nil {
-		return nil, fmt.Errorf("problem getting file info form file: %s, %v", file.Name(), err)
+		return nil, fmt.Errorf("problem initialising player db file, %v", err)
 	}
-
-	if info.Size() == 0 {
-		file.Write([]byte("[]"))
-		file.Seek(0, 0)
-	}
-
 	league, err := NewLeague(file)
 
 	if err != nil {
@@ -31,6 +18,26 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 	}
 
 	return &FileSystemPlayerStore{json.NewEncoder(&tape{file}), league}, nil
+}
+
+func initialPlayerDBFile(file *os.File) error {
+	file.Seek(0, 0)
+	info, err := file.Stat()
+
+	if err != nil {
+		return fmt.Errorf("problem getting file info form file: %s, %v", file.Name(), err)
+	}
+
+	if info.Size() == 0 {
+		file.Write([]byte("[]"))
+		file.Seek(0, 0)
+	}
+	return nil
+}
+
+type FileSystemPlayerStore struct {
+	database *json.Encoder
+	league   League
 }
 
 func (f *FileSystemPlayerStore) GetLeague() League {
