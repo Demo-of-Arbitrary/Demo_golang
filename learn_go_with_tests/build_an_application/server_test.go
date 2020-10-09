@@ -66,26 +66,13 @@ func TestGETPlayers(t *testing.T) {
 }
 
 func TestStoreWins(t *testing.T) {
-	store := StubPlayerStore{
-		map[string]int{},
-		nil,
-		nil,
-	}
-	server := NewPlayerServer(&store)
-
-	t.Run("it records wins when POST", func(t *testing.T) {
-		request := newPostWinRequest("Pepper")
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-
-		assertStatus(t, response.Code, http.StatusAccepted)
-
-		if len(store.winCalls) != 1 {
-			t.Errorf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
-		}
-	})
 	t.Run("it records wins on POST", func(t *testing.T) {
+		store := StubPlayerStore{
+			map[string]int{},
+			nil,
+			nil,
+		}
+		server := NewPlayerServer(&store)
 		player := "Pepper"
 
 		request := newPostWinRequest(player)
@@ -94,11 +81,19 @@ func TestStoreWins(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		assertStatus(t, response.Code, http.StatusAccepted)
-
-		if store.winCalls[0] != player {
-			t.Errorf("didn't store correct winner, got %q want %q", store.winCalls[0], player)
-		}
+		assertPlayerWin(t, &store, player)
 	})
+}
+
+func assertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
+	t.Helper()
+
+	if len(store.winCalls) != 1 {
+		t.Errorf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+	}
+	if store.winCalls[0] != winner {
+		t.Errorf("didn't store correct winner, got %q want %q", store.winCalls[0], winner)
+	}
 }
 
 func TestLeague(t *testing.T) {
