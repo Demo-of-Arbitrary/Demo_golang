@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -23,17 +24,23 @@ func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter
 
 func (c *CLI) PlayPoker() {
 	fmt.Fprint(c.out, PlayerPrompt)
-	c.scheduledBlindAlerts()
+
+	numberOfPlayers, _ := strconv.Atoi(c.readLine())
+
+	c.scheduledBlindAlerts(numberOfPlayers)
+
 	userInput := c.readLine()
 	c.playerStore.RecordWin(extractWinner(userInput))
 }
 
-func (c *CLI) scheduledBlindAlerts() {
+func (c *CLI) scheduledBlindAlerts(numberOfPlayers int) {
+	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
 	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
 	blindTime := 0 * time.Second
+
 	for _, blind := range blinds {
 		c.alerter.ScheduleAlertAt(blindTime, blind)
-		blindTime = blindTime + 10*time.Minute
+		blindTime = blindTime + blindIncrement
 	}
 }
 
