@@ -1,6 +1,7 @@
 package poker_test
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -8,6 +9,11 @@ import (
 
 	poker "github.com/Demo_golang/learn_go_with_tests/build_an_application"
 )
+
+var dummyBlindAlerter = new(SpyBlindAlerter)
+var dummyPlayerStore = new(poker.StubPlayerStore)
+var dummyStdIn = new(bytes.Buffer)
+var dummyStdout = new(bytes.Buffer)
 
 type SpyBlindAlerter struct {
 	alerts []scheduledAlerter
@@ -33,7 +39,7 @@ func TestCLI(t *testing.T) {
 		playerStore := &poker.StubPlayerStore{}
 		dummySpyAlterer := &SpyBlindAlerter{}
 
-		cli := poker.NewCLI(playerStore, in, dummySpyAlterer)
+		cli := poker.NewCLI(playerStore, in, dummyStdout, dummySpyAlterer)
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Chris")
@@ -44,7 +50,7 @@ func TestCLI(t *testing.T) {
 		playerStore := &poker.StubPlayerStore{}
 		dummySpyAlterer := &SpyBlindAlerter{}
 
-		cli := poker.NewCLI(playerStore, in, dummySpyAlterer)
+		cli := poker.NewCLI(playerStore, in, dummyStdout, dummySpyAlterer)
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Cleo")
@@ -55,7 +61,7 @@ func TestCLI(t *testing.T) {
 		playerStore := &poker.StubPlayerStore{}
 		blindAlerter := &SpyBlindAlerter{}
 
-		cli := poker.NewCLI(playerStore, in, blindAlerter)
+		cli := poker.NewCLI(playerStore, in, dummyStdout, blindAlerter)
 		cli.PlayPoker()
 
 		cases := []scheduledAlerter{
@@ -85,6 +91,20 @@ func TestCLI(t *testing.T) {
 			})
 		}
 
+	})
+
+	t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
+
+		stdout := new(bytes.Buffer)
+		cli := poker.NewCLI(dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter)
+		cli.PlayPoker()
+
+		got := stdout.String()
+		want := poker.PlayerPrompt
+
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
 	})
 }
 
