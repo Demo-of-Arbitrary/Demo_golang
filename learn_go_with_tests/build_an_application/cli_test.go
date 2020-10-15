@@ -10,17 +10,19 @@ import (
 )
 
 type SpyBlindAlerter struct {
-	alerts []struct {
-		scheduledAt time.Duration
-		amount      int
-	}
+	alerts []scheduledAlerter
+}
+type scheduledAlerter struct {
+	at     time.Duration
+	amount int
+}
+
+func (s *scheduledAlerter) String() string {
+	return fmt.Sprintf("%d chips at %v", s.amount, s.at)
 }
 
 func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
-	s.alerts = append(s.alerts, struct {
-		scheduledAt time.Duration
-		amount      int
-	}{
+	s.alerts = append(s.alerts, scheduledAlerter{
 		duration, amount,
 	})
 }
@@ -56,10 +58,7 @@ func TestCLI(t *testing.T) {
 		cli := poker.NewCLI(playerStore, in, blindAlerter)
 		cli.PlayPoker()
 
-		cases := []struct {
-			expectedScheduleTime time.Duration
-			expectedAmount       int
-		}{
+		cases := []scheduledAlerter{
 			{0 * time.Second, 100},
 			{10 * time.Minute, 200},
 			{20 * time.Minute, 300},
@@ -74,25 +73,30 @@ func TestCLI(t *testing.T) {
 		}
 
 		for i, c := range cases {
-			t.Run(fmt.Sprintf("%d scheduled for %v", c.expectedAmount, c.expectedScheduleTime), func(t *testing.T) {
+			t.Run(fmt.Sprintf("%d scheduled for %v", c.amount, c.at), func(t *testing.T) {
 
 				if len(blindAlerter.alerts) <= i {
 					t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
 				}
 
-				alert := blindAlerter.alerts[i]
+				got := blindAlerter.alerts[i]
+				assertScheduledAlert(t, got, c)
 
-				amountGot := alert.amount
-				if amountGot != c.expectedAmount {
-					t.Errorf("got amount %d, want %d", amountGot, c.expectedAmount)
-				}
-
-				gotScheduledTime := alert.scheduledAt
-				if gotScheduledTime != c.expectedScheduleTime {
-					t.Errorf("got scheduled time of %v, want %v", gotScheduledTime, c.expectedScheduleTime)
-				}
 			})
 		}
 
 	})
+}
+
+func assertScheduledAlert(t *testing.T, got, c scheduledAlerter) {
+
+	amountGot := got.amount
+	if amountGot != c.amount {
+		t.Errorf("got amount %d, want %d", amountGot, c.amount)
+	}
+
+	gotScheduledTime := got.at
+	if gotScheduledTime != c.at {
+		t.Errorf("got scheduled time of %v, want %v", gotScheduledTime, c.at)
+	}
 }
