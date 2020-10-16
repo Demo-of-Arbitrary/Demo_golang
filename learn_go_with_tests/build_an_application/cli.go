@@ -40,7 +40,9 @@ func (c *CLI) PlayPoker() {
 
 	userInput := c.readLine()
 
-	c.game.Over(extractWinner(userInput))
+	if strings.Contains(userInput, "wins") {
+		c.game.Over(extractWinner(userInput))
+	}
 }
 
 func (c *CLI) readLine() string {

@@ -36,6 +36,7 @@ type GameSpy struct {
 	StartedWith int
 	FinshedWith string
 	StartCalled bool
+	OverCalled  bool
 }
 
 func (g *GameSpy) Start(numberOfPlayers int) {
@@ -43,6 +44,7 @@ func (g *GameSpy) Start(numberOfPlayers int) {
 	g.StartCalled = true
 }
 func (g *GameSpy) Over(winner string) {
+	g.OverCalled = true
 	g.FinshedWith = winner
 }
 
@@ -100,6 +102,22 @@ func TestCLI(t *testing.T) {
 
 		if game.StartCalled {
 			t.Errorf("game should not have started")
+		}
+	})
+
+	t.Run("it prints an error when not specified end statement given and game should not have ended", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("7\nLloyd is a killer\n")
+		game := &GameSpy{}
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		if !game.StartCalled {
+			t.Errorf("game should have started")
+		}
+		if game.OverCalled {
+			t.Errorf("game should have not ended")
 		}
 	})
 }
