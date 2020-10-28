@@ -9,7 +9,7 @@ import (
 )
 
 type Game interface {
-	Start(n int)
+	Start(n int, alertsDestination io.Writer)
 	Over(w string)
 }
 
@@ -36,7 +36,7 @@ func (c *CLI) PlayPoker() {
 		return
 	}
 
-	c.game.Start(numberOfPlayers)
+	c.game.Start(numberOfPlayers, c.out)
 
 	userInput := c.readLine()
 
