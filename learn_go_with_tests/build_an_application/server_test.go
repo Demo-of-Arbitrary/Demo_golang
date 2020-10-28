@@ -22,7 +22,7 @@ func TestGETPlayers(t *testing.T) {
 		nil,
 		nil,
 	}
-	playerServer := NewPlayerServer(&store)
+	playerServer, _ := NewPlayerServer(&store)
 	t.Run("Returns Pepper's score", func(t *testing.T) {
 		request := newGetScoreRequest("Pepper")
 		response := httptest.NewRecorder()
@@ -57,7 +57,7 @@ func TestStoreWins(t *testing.T) {
 			nil,
 			nil,
 		}
-		server := NewPlayerServer(&store)
+		server, _ := NewPlayerServer(&store)
 		player := "Pepper"
 
 		request := newPostWinRequest(player)
@@ -80,7 +80,7 @@ func TestLeague(t *testing.T) {
 		}
 
 		store := StubPlayerStore{nil, nil, wantedLeague}
-		server := NewPlayerServer(&store)
+		server, _ := NewPlayerServer(&store)
 
 		request := newLeagueRequest()
 		response := httptest.NewRecorder()
@@ -97,7 +97,7 @@ func TestLeague(t *testing.T) {
 
 func TestGame(t *testing.T) {
 	t.Run("GET /game returns 200", func(t *testing.T) {
-		server := NewPlayerServer(&StubPlayerStore{})
+		server, _ := NewPlayerServer(&StubPlayerStore{})
 
 		request, _ := http.NewRequest("GET", "/game", nil)
 		response := httptest.NewRecorder()
@@ -108,23 +108,40 @@ func TestGame(t *testing.T) {
 	t.Run("when we get a message over a websocket it is a winner of a game", func(t *testing.T) {
 		store := &StubPlayerStore{}
 		winner := "Ruth"
-		server := httptest.NewServer(NewPlayerServer(store))
+		var playerServer = mustMakePlayerServer(t, store)
+		server := httptest.NewServer(playerServer)
 		defer server.Close()
 
 		wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
 
-		ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-		if err != nil {
-			t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
-		}
+		ws := mustDialWS(t, wsURL)
 		defer ws.Close()
 
-		if err := ws.WriteMessage(websocket.TextMessage, []byte(winner)); err != nil {
-			t.Fatalf("could not send message over ws connection %v", err)
-		}
+		writeWSMessage(t, ws, winner)
 		time.Sleep(10 * time.Millisecond)
 		AssertPlayerWin(t, store, winner)
 	})
+}
+
+func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
+	server, err := NewPlayerServer(store)
+	if err != nil {
+		t.Fatal("problem creating player server", err)
+	}
+	return server
+}
+func mustDialWS(t *testing.T, url string) *websocket.Conn {
+	ws, _, err := websocket.DefaultDialer.Dial(url, nil)
+	if err != nil {
+		t.Fatalf("could not open a ws connection on %s %v", url, err)
+	}
+	return ws
+}
+func writeWSMessage(t *testing.T, conn *websocket.Conn, message string) {
+	t.Helper()
+	if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
+		t.Fatalf("could not send message over ws connection %v", err)
+	}
 }
 
 func newLeagueRequest() *http.Request {
