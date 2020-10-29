@@ -2,6 +2,7 @@ package poker_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -13,7 +14,7 @@ func TestGame_Start(t *testing.T) {
 		blindAlerter := &SpyBlindAlerter{}
 		game := poker.NewGame(dummyPlayerStore, blindAlerter)
 
-		game.Start(5)
+		game.Start(5, os.Stdout)
 		cases := []ScheduledAlerter{
 			{At: 0 * time.Second, Amount: 100},
 			{At: 10 * time.Minute, Amount: 200},
@@ -35,7 +36,7 @@ func TestGame_Start(t *testing.T) {
 		blindAlerter := &SpyBlindAlerter{}
 		game := poker.NewGame(dummyPlayerStore, blindAlerter)
 
-		game.Start(7)
+		game.Start(7, os.Stdout)
 		cases := []ScheduledAlerter{
 			{At: 0 * time.Second, Amount: 100},
 			{At: 12 * time.Minute, Amount: 200},
