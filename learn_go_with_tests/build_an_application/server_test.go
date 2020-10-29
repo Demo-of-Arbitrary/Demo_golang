@@ -193,9 +193,24 @@ func assertGameStartedWith(t *testing.T, game *GameSpy, num int) {
 }
 func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
 	t.Helper()
-	if game.FinshedWith != winner {
-		t.Errorf("wanted Start called with %s but got %s", winner, game.FinshedWith)
+
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.FinshedWith == winner
+	})
+	if !passed {
+		t.Errorf("wanted finish called with %s but got %s", winner, game.FinshedWith)
 	}
+}
+
+func retryUntil(d time.Duration, f func() bool) bool {
+	deadline := time.Now().Add(d)
+
+	for time.Now().Before(deadline) {
+		if f() {
+			return true
+		}
+	}
+	return false
 }
 
 func mustMakePlayerServer(t *testing.T, store PlayerStore, game Game) *PlayerServer {
