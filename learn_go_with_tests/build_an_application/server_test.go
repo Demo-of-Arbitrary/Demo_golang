@@ -13,6 +13,24 @@ import (
 	"time"
 )
 
+type GameSpy struct {
+	StartedWith int
+	FinshedWith string
+	StartCalled bool
+	OverCalled  bool
+}
+
+func (g *GameSpy) Start(numberOfPlayers int, alertsDestination io.Writer) {
+	g.StartedWith = numberOfPlayers
+	g.StartCalled = true
+}
+func (g *GameSpy) Over(winner string) {
+	g.OverCalled = true
+	g.FinshedWith = winner
+}
+
+var dummyGame = &GameSpy{}
+
 func TestGETPlayers(t *testing.T) {
 	store := StubPlayerStore{
 		map[string]int{
@@ -22,7 +40,7 @@ func TestGETPlayers(t *testing.T) {
 		nil,
 		nil,
 	}
-	playerServer, _ := NewPlayerServer(&store)
+	playerServer, _ := NewPlayerServer(&store, dummyGame)
 	t.Run("Returns Pepper's score", func(t *testing.T) {
 		request := newGetScoreRequest("Pepper")
 		response := httptest.NewRecorder()
@@ -57,7 +75,7 @@ func TestStoreWins(t *testing.T) {
 			nil,
 			nil,
 		}
-		server, _ := NewPlayerServer(&store)
+		server, _ := NewPlayerServer(&store, dummyGame)
 		player := "Pepper"
 
 		request := newPostWinRequest(player)
@@ -80,7 +98,7 @@ func TestLeague(t *testing.T) {
 		}
 
 		store := StubPlayerStore{nil, nil, wantedLeague}
-		server, _ := NewPlayerServer(&store)
+		server, _ := NewPlayerServer(&store, dummyGame)
 
 		request := newLeagueRequest()
 		response := httptest.NewRecorder()
@@ -97,7 +115,7 @@ func TestLeague(t *testing.T) {
 
 func TestGame(t *testing.T) {
 	t.Run("GET /game returns 200", func(t *testing.T) {
-		server, _ := NewPlayerServer(&StubPlayerStore{})
+		server, _ := NewPlayerServer(&StubPlayerStore{}, dummyGame)
 
 		request, _ := http.NewRequest("GET", "/game", nil)
 		response := httptest.NewRecorder()
@@ -108,7 +126,7 @@ func TestGame(t *testing.T) {
 	t.Run("when we get a message over a websocket it is a winner of a game", func(t *testing.T) {
 		store := &StubPlayerStore{}
 		winner := "Ruth"
-		var playerServer = mustMakePlayerServer(t, store)
+		var playerServer = mustMakePlayerServer(t, store, dummyGame)
 		server := httptest.NewServer(playerServer)
 		defer server.Close()
 
@@ -121,10 +139,39 @@ func TestGame(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 		AssertPlayerWin(t, store, winner)
 	})
+	t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing.T) {
+		store := &StubPlayerStore{}
+		game := &GameSpy{}
+		winner := "Ruth"
+		server := httptest.NewServer(mustMakePlayerServer(t, store, game))
+		ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+
+		defer server.Close()
+		defer ws.Close()
+
+		writeWSMessage(t, ws, "3")
+		writeWSMessage(t, ws, winner)
+
+		time.Sleep(10 * time.Millisecond)
+		assertGameStartedWith(t, game, 3)
+		assertFinishCalledWith(t, game, winner)
+	})
+}
+func assertGameStartedWith(t *testing.T, game *GameSpy, num int) {
+	t.Helper()
+	if game.StartedWith != num {
+		t.Errorf("wanted Start called with %d but got %d", num, game.StartedWith)
+	}
+}
+func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
+	t.Helper()
+	if game.FinshedWith != winner {
+		t.Errorf("wanted Start called with %s but got %s", winner, game.FinshedWith)
+	}
 }
 
-func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
-	server, err := NewPlayerServer(store)
+func mustMakePlayerServer(t *testing.T, store PlayerStore, game Game) *PlayerServer {
+	server, err := NewPlayerServer(store, game)
 	if err != nil {
 		t.Fatal("problem creating player server", err)
 	}

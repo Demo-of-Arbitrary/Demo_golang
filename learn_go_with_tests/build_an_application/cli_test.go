@@ -34,27 +34,11 @@ func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int, to
 	})
 }
 
-type GameSpy struct {
-	StartedWith int
-	FinshedWith string
-	StartCalled bool
-	OverCalled  bool
-}
-
-func (g *GameSpy) Start(numberOfPlayers int, alertsDestination io.Writer) {
-	g.StartedWith = numberOfPlayers
-	g.StartCalled = true
-}
-func (g *GameSpy) Over(winner string) {
-	g.OverCalled = true
-	g.FinshedWith = winner
-}
-
 func TestCLI(t *testing.T) {
 	t.Run("record chris win form user input", func(t *testing.T) {
 		in := strings.NewReader("5\nChris wins\n")
 
-		game := &GameSpy{}
+		game := &poker.GameSpy{}
 
 		cli := poker.NewCLI(in, dummyStdout, game)
 		cli.PlayPoker()
@@ -67,7 +51,7 @@ func TestCLI(t *testing.T) {
 	t.Run("record cleo win form user input", func(t *testing.T) {
 		in := strings.NewReader("5\nCleo wins\n")
 
-		game := &GameSpy{}
+		game := &poker.GameSpy{}
 
 		cli := poker.NewCLI(in, dummyStdout, game)
 		cli.PlayPoker()
@@ -80,7 +64,7 @@ func TestCLI(t *testing.T) {
 	t.Run("it prompts the user to enter the number of players and starts the game", func(t *testing.T) {
 		stdout := &bytes.Buffer{}
 		in := strings.NewReader("7\n")
-		game := &GameSpy{}
+		game := &poker.GameSpy{}
 
 		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
@@ -95,7 +79,7 @@ func TestCLI(t *testing.T) {
 	t.Run("it prints an error when a non numeric value is entered and doesn't start the game", func(t *testing.T) {
 		stdout := &bytes.Buffer{}
 		in := strings.NewReader("Pies\n")
-		game := &GameSpy{}
+		game := &poker.GameSpy{}
 
 		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
@@ -110,7 +94,7 @@ func TestCLI(t *testing.T) {
 	t.Run("it prints an error when not specified end statement given and game should not have ended", func(t *testing.T) {
 		stdout := &bytes.Buffer{}
 		in := strings.NewReader("7\nLloyd is a killer\n")
-		game := &GameSpy{}
+		game := &poker.GameSpy{}
 
 		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
